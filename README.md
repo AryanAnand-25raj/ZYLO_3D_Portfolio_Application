@@ -1,4 +1,4 @@
-# PortfolioX 3D (ZYLO) — AI-Powered 3D Portfolio Generator SaaS
+(ZYLO) — AI-Powered 3D Portfolio Generator SaaS
 
 <div align="center">
   <h3>Next-Generation WebGL Spatial Portfolio Generator</h3>
