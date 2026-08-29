@@ -1,0 +1,373 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------------------------------------
+// 1. USER DATA DOMAIN
+// ----------------------------------------------------
+
+enum UserRole {
+  USER
+  CREATOR
+  ADMIN
+}
+
+model User {
+  id            String            @id @default(cuid())
+  name          String?
+  email         String?           @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole          @default(USER)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  portfolios    Portfolio[]
+  subscription  Subscription?
+  resumeUploads ResumeUpload[]
+  drafts        PortfolioDraft[]
+  aiJobs        AIJob[]
+  aiUsages      AIUsage[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ----------------------------------------------------
+// 2. RESUME INGESTION & EXTRACTION DOMAIN (TASK 02)
+// ----------------------------------------------------
+
+enum UploadStatus {
+  PENDING
+  PROCESSING
+  EXTRACTED
+  FAILED
+}
+
+model ResumeUpload {
+  id          String            @id @default(cuid())
+  userId      String            @map("user_id")
+  fileName    String            @map("file_name")
+  fileKey     String            @map("file_key") // Private server storage path/key
+  mimeType    String            @map("mime_type")
+  fileSize    Int               @map("file_size")
+  status      UploadStatus      @default(PENDING)
+  rawText     String?           @db.Text @map("raw_text")
+  errorMessage String?          @map("error_message")
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  extraction  ResumeExtraction?
+
+  @@index([userId])
+  @@map("resume_uploads")
+}
+
+model ResumeExtraction {
+  id             String       @id @default(cuid())
+  resumeUploadId String       @unique @map("resume_upload_id")
+  profile        Json         // Extracted profile header fields
+  experience     Json         @default("[]") // Extracted experiences
+  education      Json         @default("[]") // Extracted education
+  skills         Json         @default("[]") // Extracted skills list/categories
+  projects       Json         @default("[]") // Extracted projects
+  rawData        Json         @map("raw_data") // Raw parsed sections & tokens
+  createdAt      DateTime     @default(now())
+
+  upload         ResumeUpload @relation(fields: [resumeUploadId], references: [id], onDelete: Cascade)
+
+  @@map("resume_extractions")
+}
+
+// ----------------------------------------------------
+// 3. ONBOARDING & DRAFT SYSTEM (TASK 02)
+// ----------------------------------------------------
+
+model PortfolioDraft {
+  id                String               @id @default(cuid())
+  userId            String               @map("user_id")
+  currentStep       String               @default("profile") @map("current_step")
+  profileData       Json                 @map("profile_data")       // Manual form entries
+  extractedData     Json?                @map("extracted_data")     // Last parsed resume data
+  canonicalProfile  Json?                @map("canonical_profile")  // Approved unified profile
+  preferences       Json?                // Target audience, goal, visual intensity
+  stylePrompt       String?              @db.Text @map("style_prompt")
+  selectedSections  Json?                @map("selected_sections")  // Array of enabled section names
+  completenessScore Int                  @default(0) @map("completeness_score")
+  completenessData  Json?                @map("completeness_data")  // Missing fields, recommendations
+  followUpQuestions Json?                @map("follow_up_questions") // Array of { id, question, answer }
+  generatedContent  Json?                @map("generated_content")  // Generated Portfolio Content draft
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conflicts         DataConflictRecord[]
+
+  @@index([userId])
+  @@map("portfolio_drafts")
+}
+
+model DataConflictRecord {
+  id            String         @id @default(cuid())
+  draftId       String         @map("draft_id")
+  field         String
+  values        Json           // Array of { source: DataSource, value: unknown }
+  resolved      Boolean        @default(false)
+  resolvedValue Json?          @map("resolved_value")
+  resolvedAt    DateTime?      @map("resolved_at")
+  createdAt     DateTime       @default(now())
+
+  draft         PortfolioDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  @@index([draftId])
+  @@map("data_conflict_records")
+}
+
+// ----------------------------------------------------
+// 4. ASYNCHRONOUS AI JOBS (TASK 02)
+// ----------------------------------------------------
+
+enum AIJobType {
+  RESUME_EXTRACT
+  PROFILE_NORMALIZE
+  COMPLETENESS_ANALYZE
+  CONTENT_GENERATE
+  SECTION_REGENERATE
+  PATCH_APPLY
+}
+
+enum AIJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model AIJob {
+  id          String      @id @default(cuid())
+  userId      String      @map("user_id")
+  portfolioId String?     @map("portfolio_id")
+  type        AIJobType
+  status      AIJobStatus @default(PENDING)
+  progress    Int         @default(0) // 0 - 100
+  input       Json
+  output      Json?
+  error       String?
+  completedAt DateTime?   @map("completed_at")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("ai_jobs")
+}
+
+model AIUsage {
+  id            String    @id @default(cuid())
+  userId        String    @map("user_id")
+  portfolioId   String?   @map("portfolio_id")
+  jobId         String?   @map("job_id")
+  provider      String    @default("openai")
+  model         String
+  task          String
+  inputTokens   Int       @map("input_tokens")
+  outputTokens  Int       @map("output_tokens")
+  estimatedCost Float     @default(0.0) @map("estimated_cost")
+  createdAt     DateTime  @default(now())
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("ai_usages")
+}
+
+// ----------------------------------------------------
+// 5. PORTFOLIO & ARCHITECTURAL DOMAINS (FROM TASK 01)
+// ----------------------------------------------------
+
+model Portfolio {
+  id           String            @id @default(cuid())
+  userId       String            @map("user_id")
+  slug         String            @unique
+  title        String
+  description  String?           @db.Text
+  isPublished  Boolean           @default(false)
+  customDomain String?           @unique @map("custom_domain")
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content      PortfolioContent?
+  design       PortfolioDesign?
+  scene        PortfolioScene?
+  deployments  Deployment[]
+
+  @@index([userId])
+  @@index([slug])
+  @@map("portfolios")
+}
+
+model PortfolioContent {
+  id              String    @id @default(cuid())
+  portfolioId     String    @unique @map("portfolio_id")
+  profileHeader   Json      @map("profile_header")
+  socials         Json      @default("[]")
+  experiences     Json      @default("[]")
+  projects        Json      @default("[]")
+  skillCategories Json      @default("[]") @map("skill_categories")
+  education       Json      @default("[]")
+  customSections  Json      @default("[]") @map("custom_sections")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  portfolio       Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio_contents")
+}
+
+model PortfolioDesign {
+  id            String    @id @default(cuid())
+  portfolioId   String    @unique @map("portfolio_id")
+  themeId       String    @default("theme-neon-cyber") @map("theme_id")
+  themeName     String    @default("Neon Cyberpunk") @map("theme_name")
+  variant       String    @default("dark")
+  colors        Json
+  typography    Json
+  glassmorphism Json
+  animations    Json
+  layout        Json
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  portfolio     Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio_designs")
+}
+
+model PortfolioScene {
+  id             String    @id @default(cuid())
+  portfolioId    String    @unique @map("portfolio_id")
+  sceneId        String    @default("scene-cyber-dimension") @map("scene_id")
+  sceneName      String    @default("Cyber Dimension") @map("scene_name")
+  version        String    @default("1.0.0")
+  cameraConfig   Json      @map("camera_config")
+  lightingConfig Json      @map("lighting_config")
+  envConfig      Json      @map("env_config")
+  postProcessing Json      @map("post_processing")
+  nodes          Json      @default("[]")
+  interactivity  Json
+  quality        String    @default("high")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  portfolio      Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio_scenes")
+}
+
+enum DeploymentStatus {
+  QUEUED
+  BUILDING
+  DEPLOYED
+  FAILED
+  REMOVED
+}
+
+model Deployment {
+  id          String           @id @default(cuid())
+  portfolioId String           @map("portfolio_id")
+  version     Int              @default(1)
+  status      DeploymentStatus @default(QUEUED)
+  domain      String?
+  snapshot    Json
+  errorMsg    String?          @map("error_msg")
+  deployedAt  DateTime?        @map("deployed_at")
+  createdAt   DateTime         @default(now())
+
+  portfolio   Portfolio        @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
+  @@map("deployments")
+}
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  AGENCY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique @map("user_id")
+  tier                 SubscriptionTier   @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId     String?            @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?            @unique @map("stripe_subscription_id")
+  stripePriceId        String?            @map("stripe_price_id")
+  currentPeriodEnd     DateTime?          @map("current_period_end")
+  maxPortfolios        Int                @default(1) @map("max_portfolios")
+  customDomainEnabled  Boolean            @default(false) @map("custom_domain_enabled")
+  aiGenerationQuota    Int                @default(5) @map("ai_generation_quota")
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}

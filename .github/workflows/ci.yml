@@ -1,0 +1,48 @@
+name: ZYLO CI Pipeline
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  validate:
+    name: Typecheck, Lint, Test & Build
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/zylo_test_db?schema=public"
+      NEXTAUTH_SECRET: "ci_pipeline_dummy_nextauth_secret_key_32_chars_min"
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      NEXT_PUBLIC_APP_NAME: "ZYLO"
+      NODE_ENV: "test"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: TypeScript Type-Check
+        run: npm run type-check
+
+      - name: ESLint Check
+        run: npm run lint
+
+      - name: Run Automated Unit Tests (Vitest)
+        run: npm run test
+
+      - name: Production Build Verification
+        run: npm run build

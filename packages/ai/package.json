@@ -1,0 +1,11 @@
+{
+  "name": "@zylo/ai",
+  "version": "0.1.0",
+  "description": "Server-side AI processing pipeline for resume extraction, profile normalization, completeness analysis, and portfolio content generation",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "private": true,
+  "peerDependencies": {
+    "zod": "^3.22.0"
+  }
+}
