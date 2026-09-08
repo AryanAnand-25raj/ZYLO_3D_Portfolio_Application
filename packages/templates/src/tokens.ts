@@ -1,0 +1,85 @@
+export const DESIGN_TOKENS = {
+  colors: {
+    cyberCyan: "#00F0FF",
+    cyberPurple: "#9D00FF",
+    neonEmerald: "#00FF66",
+    orbitBlue: "#38BDF8",
+    deepIndigo: "#818CF8",
+    glassSlate: "#E2E8F0",
+    iceBlue: "#0EA5E9",
+    creativeRose: "#F43F5E",
+    amberWarm: "#F59E0B",
+    minimalMono: "#F8FAFC",
+    obsidianBlack: "#05070D",
+    deepSpaceVoid: "#02040A",
+    cleanWhite: "#FFFFFF",
+    mutedGray: "#64748B",
+  },
+  typography: {
+    fontFamilies: {
+      technical: "Space Grotesk, JetBrains Mono, sans-serif",
+      modernSans: "Inter, Plus Jakarta Sans, sans-serif",
+      display: "Outfit, Clash Display, sans-serif",
+      editorial: "Syne, serif",
+      mono: "JetBrains Mono, monospace",
+    },
+    scale: {
+      xs: "0.75rem",
+      sm: "0.875rem",
+      base: "1rem",
+      lg: "1.125rem",
+      xl: "1.25rem",
+      "2xl": "1.5rem",
+      "3xl": "1.875rem",
+      "4xl": "2.25rem",
+      "5xl": "3rem",
+      "6xl": "3.75rem",
+    },
+  },
+  spacing: {
+    sectionPadding: "py-24 px-6 md:px-12",
+    containerMax: "max-w-7xl mx-auto",
+    cardPadding: "p-6 md:p-8",
+    gapGrid: "gap-6 md:gap-8",
+  },
+  radius: {
+    none: "0px",
+    sm: "0.375rem",
+    md: "0.5rem",
+    lg: "0.75rem",
+    xl: "1rem",
+    "2xl": "1.5rem",
+    full: "9999px",
+  },
+  shadows: {
+    glowCyan: "0 0 35px rgba(0, 240, 255, 0.25)",
+    glowPurple: "0 0 35px rgba(157, 0, 255, 0.25)",
+    glowBlue: "0 0 35px rgba(56, 189, 248, 0.25)",
+    softGlass: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
+    subtleCard: "0 4px 20px rgba(0, 0, 0, 0.2)",
+  },
+  motion: {
+    easing: {
+      smooth: "cubic-bezier(0.16, 1, 0.3, 1)",
+      spring: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      linear: "linear",
+    },
+    durations: {
+      fast: "0.15s",
+      normal: "0.3s",
+      slow: "0.6s",
+      drift: "12s",
+    },
+  },
+  lighting: {
+    presets: {
+      cyberpunk: { ambientIntensity: 0.35, primaryColor: "#00F0FF", secondaryColor: "#9D00FF" },
+      deepSpace: { ambientIntensity: 0.25, primaryColor: "#38BDF8", secondaryColor: "#818CF8" },
+      studioSoft: { ambientIntensity: 0.6, primaryColor: "#FFFFFF", secondaryColor: "#E2E8F0" },
+      vibrantCreative: { ambientIntensity: 0.45, primaryColor: "#F43F5E", secondaryColor: "#F59E0B" },
+      minimalDirect: { ambientIntensity: 0.7, primaryColor: "#FFFFFF", secondaryColor: "#94A3B8" },
+    },
+  },
+} as const;
+
+export type DesignTokens = typeof DESIGN_TOKENS;

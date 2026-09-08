@@ -1,0 +1,12 @@
+{
+  "name": "@zylo/templates",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZYLO 3D Portfolio Templates System",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@zylo/three-engine": "*",
+    "zod": "^3.24.2"
+  }
+}

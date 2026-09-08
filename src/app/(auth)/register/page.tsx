@@ -16,23 +16,48 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     try {
-      // Direct signIn via credentials handles account generation in foundation stage
       const res = await signIn("credentials", {
         redirect: false,
         email,
         password,
       });
 
+      if (res?.error) {
+        setError("Could not create account. Please check your details.");
+      } else if (res?.ok) {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch {
+      setError("An unexpected error occurred during account creation.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuickDemo = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        email: "founder@zylo.design",
+        password: "password123",
+      });
       if (res?.ok) {
         router.push("/dashboard");
         router.refresh();
       }
+    } catch {
+      setError("Could not sign in with demo account.");
     } finally {
       setLoading(false);
     }
@@ -59,6 +84,12 @@ export default function RegisterPage() {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
+                {error}
+              </div>
+            )}
+
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-zylo-purple" /> Full Name
@@ -110,6 +141,29 @@ export default function RegisterPage() {
               {loading ? "Creating Studio..." : "Get Started Free"}
               <ArrowRight className="w-4 h-4" />
             </Button>
+
+            <div className="pt-2 text-center">
+              <button
+                type="button"
+                onClick={handleQuickDemo}
+                className="text-xs text-zylo-cyan hover:underline inline-flex items-center gap-1.5 mx-auto"
+                disabled={loading}
+              >
+                <Sparkles className="w-3.5 h-3.5" /> Instant Test Drive with Demo Account
+              </button>
+            </div>
+
+            <p className="text-[11px] text-center text-slate-400 mt-2 leading-relaxed">
+              By continuing, you agree to ZYLO&apos;s{" "}
+              <Link href="/terms" className="text-zylo-cyan hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="text-zylo-cyan hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </p>
           </form>
         </CardContent>
 

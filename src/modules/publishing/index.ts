@@ -1,3 +1,10 @@
+export * from "./types";
+export * from "./validator";
+export * from "./slugs";
+export * from "./domains";
+export * from "./store";
+
+// Backwards compatibility types/helpers
 export type DeploymentState = "QUEUED" | "BUILDING" | "DEPLOYED" | "FAILED" | "REMOVED";
 
 export interface DeploymentSnapshot {
@@ -22,7 +29,3 @@ export function generatePortfolioSlug(title: string): string {
   return `${base}-${suffix}`;
 }
 
-export function validateCustomDomain(domain: string): boolean {
-  const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-  return domainRegex.test(domain);
-}

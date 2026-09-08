@@ -23,6 +23,18 @@ import {
   CrystalPrism,
   InteractiveCard3D,
   NeuralNodes,
+  AnimeCharacterAvatar,
+  MechaCore,
+  SakuraPetalField,
+  SpacePlanet,
+  SatelliteOrbit,
+  BuildingWireframe,
+  CADStructure,
+  AutomotiveChassis,
+  MechanicalGears,
+  TerminalCodeWall,
+  ExecutiveMonolith,
+  VoxelGrid,
   NodeComponentProps,
 } from "../components";
 
@@ -57,6 +69,20 @@ export const ComponentRegistry: Record<ComponentType, React.FC<NodeComponentProp
   CrystalPrism,
   InteractiveCard3D,
   NeuralNodes,
+
+  // New Anime & Domain Procedural Nodes
+  AnimeCharacterAvatar,
+  MechaCore,
+  SakuraPetalField,
+  SpacePlanet,
+  SatelliteOrbit,
+  BuildingWireframe,
+  CADStructure,
+  AutomotiveChassis,
+  MechanicalGears,
+  TerminalCodeWall,
+  ExecutiveMonolith,
+  VoxelGrid,
 };
 
 export function getComponentByType(type: ComponentType | string): React.FC<NodeComponentProps> {

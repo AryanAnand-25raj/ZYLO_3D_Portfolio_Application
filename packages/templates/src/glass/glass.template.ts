@@ -1,0 +1,181 @@
+import { TemplateDefinition, TemplateSchema } from "../types";
+import { DESIGN_TOKENS } from "../tokens";
+
+export const glassTemplate: TemplateDefinition = TemplateSchema.parse({
+  id: "glass",
+  name: "Prismatic Glass",
+  description:
+    "An ultra-refined frosted glass aesthetic designed for high-growth software and product leaders, with controlled transmission and floating refraction slabs.",
+  category: "Product & Software",
+  templateVersion: "1.0.0",
+  bestFor: "Product Managers, SaaS Founders, Frontend Engineers & UI/UX Architects",
+  targetAudience: ["Venture Capitalists", "Design Leaders", "Recruiters"],
+
+  supportedSections: ["hero", "about", "experience", "projects", "skills", "education", "contact"],
+  supportedObjects: [
+    "InteractiveCard3D",
+    "CrystalPrism",
+    "box",
+    "plane",
+    "model",
+  ],
+  supportedAnimations: ["float", "rotate"],
+
+  defaultTheme: {
+    id: "theme-prismatic-glass",
+    name: "Prismatic Glass",
+    variant: "dark",
+    colors: {
+      primary: DESIGN_TOKENS.colors.iceBlue,
+      secondary: "#6366F1",
+      accent: "#38BDF8",
+      background: "#080D1A",
+      surface: "#10192E",
+      textPrimary: "#FFFFFF",
+      textMuted: "#94A3B8",
+      border: "rgba(255, 255, 255, 0.14)",
+      glowColor: "rgba(14, 165, 233, 0.25)",
+    },
+    typography: {
+      fontFamily: "Plus Jakarta Sans",
+      headingFontFamily: "Outfit",
+      baseSize: "md",
+      scaleRatio: 1.25,
+    },
+    glassmorphism: {
+      enabled: true,
+      blurIntensity: 24,
+      opacity: 0.55,
+      borderWidth: 1,
+      reflectionGlow: true,
+    },
+    animations: {
+      reducedMotion: false,
+      transitionSpeed: "normal",
+      entranceEffects: true,
+      hoverSpring: true,
+    },
+    layout: {
+      containerWidth: "wide",
+      cardStyle: "glass",
+      borderRadius: "xl",
+    },
+  },
+
+  defaultScene: {
+    id: "scene-glass-default",
+    name: "Prismatic Glass Monoliths",
+    version: "1.0.0",
+    camera: {
+      type: "perspective",
+      fov: 45,
+      position: [0, 0, 7.5],
+      target: [0, 0, 0],
+      near: 0.1,
+      far: 1000,
+      zoom: 1,
+      controls: {
+        enabled: true,
+        autoRotate: true,
+        autoRotateSpeed: 0.35,
+        enableZoom: false,
+        enablePan: false,
+        maxPolarAngle: Math.PI / 2 + 0.1,
+        minPolarAngle: Math.PI / 3,
+        dampingFactor: 0.05,
+      },
+    },
+    lighting: {
+      preset: "studio",
+      ambientIntensity: 0.55,
+      lights: [
+        { id: "soft-key", type: "directional", color: "#E0F2FE", intensity: 2.8, position: [3, 4, 3] },
+        { id: "cool-fill", type: "point", color: "#38BDF8", intensity: 1.8, position: [-3, -1, 2] },
+      ],
+    },
+    environment: {
+      preset: "night",
+      background: { type: "solid", color: "#080D1A" },
+      blur: 0.9,
+      fog: { enabled: true, color: "#080D1A", near: 5, far: 22 },
+      stars: { enabled: false, count: 0, color: "#FFFFFF", radius: 50, depth: 40, speed: 0 },
+    },
+    postProcessing: {
+      bloom: { enabled: true, intensity: 0.6, luminanceThreshold: 0.45, luminanceSmoothing: 0.95 },
+      chromaticAberration: { enabled: false, offset: [0.001, 0.001] },
+      vignette: { enabled: true, darkness: 0.4, offset: 0.25 },
+    },
+    performance: {
+      tier: "medium",
+      maxPixelRatio: 2,
+      shadows: false,
+      postprocessing: true,
+      maxParticles: 800,
+      maxLights: 3,
+      maxObjects: 20,
+      reducedMotion: false,
+    },
+    nodes: [
+      {
+        id: "glass-crystal-prism",
+        componentType: "CrystalPrism",
+        position: [0, 0.2, 0],
+        rotation: [0.2, 0.3, 0],
+        scale: [1.2, 1.4, 1.2],
+        materialProps: {
+          color: "#E2E8F0",
+          metalness: 0.1,
+          roughness: 0.05,
+          transmission: 0.92,
+          ior: 1.52,
+          opacity: 0.85,
+          transparent: true,
+        },
+        animation: { type: "float", floatSpeed: 0.8, floatAmplitude: 0.15, rotateSpeed: [0.02, 0.15, 0] },
+        interactive: { hoverScale: 1.08, hoverGlow: true, pointerParallax: true, parallaxStrength: 0.25 },
+        visible: true,
+      },
+      {
+        id: "glass-floating-card-left",
+        componentType: "InteractiveCard3D",
+        position: [-2.4, -0.6, -0.8],
+        rotation: [0.1, 0.4, -0.05],
+        scale: [1.1, 0.7, 0.05],
+        materialProps: { color: "#0EA5E9", opacity: 0.4, transparent: true, roughness: 0.1 },
+        animation: { type: "float", floatSpeed: 0.6, floatAmplitude: 0.1 },
+        interactive: { hoverScale: 1.1, hoverGlow: true },
+        visible: true,
+      },
+    ],
+    quality: "high",
+    interactivity: { mouseParallax: true, parallaxFactor: 0.35, scrollDriven: true },
+  },
+
+  defaultLayout: {
+    containerWidth: "wide",
+    heroLayout: "split-canvas-right",
+    cardStyle: "glass",
+    navStyle: "floating-pill",
+    sectionSpacing: "normal",
+  },
+
+  defaultMotion: {
+    scrollDriven: true,
+    mouseParallax: true,
+    parallaxStrength: 0.35,
+    rotationSpeed: 0.35,
+    transitionPreset: "smooth-fade",
+  },
+
+  performanceProfile: "Balanced WebGL (Controlled Bloom & Refraction)",
+  performance: {
+    tier: "medium",
+    recommendedParticles: 800,
+    maxLights: 3,
+    maxDpr: 2,
+    supportsPostProcessing: true,
+    supportsShadows: false,
+  },
+
+  previewImage: "/templates/glass-preview.webp",
+});

@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { PortfolioCard } from "@/components/dashboard/PortfolioCard";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -107,13 +108,55 @@ export default function DashboardOverviewPage() {
                 Live interactive WebGL portfolio instances linked to your account.
               </p>
             </div>
-            <Badge variant="cyan" className="font-mono text-xs">
-              1 Active
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Link href="/create">
+                <Button variant="glow" size="sm" className="text-xs gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" /> Create New Portfolio
+                </Button>
+              </Link>
+              <Badge variant="cyan" className="font-mono text-xs">
+                1 Active
+              </Badge>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <PortfolioCard {...demoPortfolio} />
+          </div>
+
+          {/* Quick Onboarding Next Steps Cards for Zero / Setup States */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="p-4 rounded-xl glass-panel border border-white/10 flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="text-xs font-semibold text-white flex items-center gap-1.5">
+                  <Box className="w-3.5 h-3.5 text-zylo-purple" /> GitHub Repositories
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Connect GitHub to automatically showcase featured projects with star counts.
+                </p>
+              </div>
+              <Link href="/dashboard/settings/integrations">
+                <Button variant="outline" size="sm" className="text-xs whitespace-nowrap">
+                  Connect GitHub
+                </Button>
+              </Link>
+            </div>
+
+            <div className="p-4 rounded-xl glass-panel border border-white/10 flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="text-xs font-semibold text-white flex items-center gap-1.5">
+                  <Eye className="w-3.5 h-3.5 text-zylo-emerald" /> Visitor Telemetry
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Inspect cookieless, zero-raw-IP analytics and live WebGL performance.
+                </p>
+              </div>
+              <Link href="/dashboard/analytics">
+                <Button variant="outline" size="sm" className="text-xs whitespace-nowrap">
+                  View Analytics
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -123,44 +166,56 @@ export default function DashboardOverviewPage() {
             3D Studio Tooling
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <Card className="glass-panel glass-panel-hover border-zylo-border p-6 cursor-pointer">
-              <div className="p-3 rounded-xl bg-zylo-cyan/10 border border-zylo-cyan/30 w-fit mb-4">
-                <Box className="w-6 h-6 text-zylo-cyan" />
-              </div>
-              <h4 className="font-heading font-semibold text-white mb-1">3D Scene Studio</h4>
-              <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                Configure procedural geometries, camera orbits, particle fields, and real-time lighting presets.
-              </p>
-              <span className="text-xs text-zylo-cyan font-medium flex items-center gap-1">
-                Open Scene Studio <ArrowUpRight className="w-3.5 h-3.5" />
-              </span>
-            </Card>
+            <Link href="/dashboard/scenes">
+              <Card className="glass-panel glass-panel-hover border-zylo-border p-6 cursor-pointer h-full flex flex-col justify-between group">
+                <div>
+                  <div className="p-3 rounded-xl bg-zylo-cyan/10 border border-zylo-cyan/30 w-fit mb-4 group-hover:scale-105 transition-transform">
+                    <Box className="w-6 h-6 text-zylo-cyan" />
+                  </div>
+                  <h4 className="font-heading font-semibold text-white mb-1 group-hover:text-zylo-cyan transition-colors">3D Scene Studio</h4>
+                  <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                    Configure procedural geometries, camera orbits, particle fields, and real-time lighting presets.
+                  </p>
+                </div>
+                <span className="text-xs text-zylo-cyan font-medium flex items-center gap-1">
+                  Open Scene Studio <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </span>
+              </Card>
+            </Link>
 
-            <Card className="glass-panel glass-panel-hover border-zylo-border p-6 cursor-pointer">
-              <div className="p-3 rounded-xl bg-zylo-purple/10 border border-zylo-purple/30 w-fit mb-4">
-                <Palette className="w-6 h-6 text-zylo-purple" />
-              </div>
-              <h4 className="font-heading font-semibold text-white mb-1">Theme & Glass Engine</h4>
-              <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                Tune HSL color palettes, typography scales, glassmorphism blur shaders, and neon border glows.
-              </p>
-              <span className="text-xs text-zylo-purple font-medium flex items-center gap-1">
-                Customize Themes <ArrowUpRight className="w-3.5 h-3.5" />
-              </span>
-            </Card>
+            <Link href="/dashboard/themes">
+              <Card className="glass-panel glass-panel-hover border-zylo-border p-6 cursor-pointer h-full flex flex-col justify-between group">
+                <div>
+                  <div className="p-3 rounded-xl bg-zylo-purple/10 border border-zylo-purple/30 w-fit mb-4 group-hover:scale-105 transition-transform">
+                    <Palette className="w-6 h-6 text-zylo-purple" />
+                  </div>
+                  <h4 className="font-heading font-semibold text-white mb-1 group-hover:text-zylo-purple transition-colors">Theme & Glass Engine</h4>
+                  <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                    Tune HSL color palettes, typography scales, glassmorphism blur shaders, and neon border glows.
+                  </p>
+                </div>
+                <span className="text-xs text-zylo-purple font-medium flex items-center gap-1">
+                  Customize Themes <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </span>
+              </Card>
+            </Link>
 
-            <Card className="glass-panel glass-panel-hover border-zylo-border p-6 cursor-pointer">
-              <div className="p-3 rounded-xl bg-zylo-emerald/10 border border-zylo-emerald/30 w-fit mb-4">
-                <Layers className="w-6 h-6 text-zylo-emerald" />
-              </div>
-              <h4 className="font-heading font-semibold text-white mb-1">Content Architecture</h4>
-              <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                Manage your structured experiences, projects, skills, and biography with strict Zod validation.
-              </p>
-              <span className="text-xs text-zylo-emerald font-medium flex items-center gap-1">
-                Edit Content <ArrowUpRight className="w-3.5 h-3.5" />
-              </span>
-            </Card>
+            <Link href="/builder/port-demo-1">
+              <Card className="glass-panel glass-panel-hover border-zylo-border p-6 cursor-pointer h-full flex flex-col justify-between group">
+                <div>
+                  <div className="p-3 rounded-xl bg-zylo-emerald/10 border border-zylo-emerald/30 w-fit mb-4 group-hover:scale-105 transition-transform">
+                    <Layers className="w-6 h-6 text-zylo-emerald" />
+                  </div>
+                  <h4 className="font-heading font-semibold text-white mb-1 group-hover:text-zylo-emerald transition-colors">Content Architecture</h4>
+                  <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                    Manage your structured experiences, projects, skills, and biography with strict Zod validation.
+                  </p>
+                </div>
+                <span className="text-xs text-zylo-emerald font-medium flex items-center gap-1">
+                  Edit in Studio <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </span>
+              </Card>
+            </Link>
           </div>
         </div>
       </main>

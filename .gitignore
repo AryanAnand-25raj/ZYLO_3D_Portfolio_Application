@@ -35,7 +35,6 @@ Thumbs.db
 next-env.d.ts
 /.turbo
 
-# IDE configs
-.idea/
-*.sublime-project
-*.sublime-workspace
+# Local Storage & Uploads
+/.storage/
+

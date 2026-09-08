@@ -50,17 +50,27 @@ export const LightingConfigSchema = z.object({
 });
 export type LightingConfig = z.infer<typeof LightingConfigSchema>;
 
+export const BackgroundConfigSchema = z
+  .union([
+    z.boolean().transform((val) => ({
+      type: val ? ("preset" as const) : ("transparent" as const),
+      color: "#05070d",
+      gradientColors: undefined as [string, string] | undefined,
+    })),
+    z.object({
+      type: z.enum(["solid", "gradient", "transparent", "preset"]).default("transparent"),
+      color: z.string().default("#05070d"),
+      gradientColors: z.tuple([z.string(), z.string()]).optional(),
+    }),
+  ])
+  .default({});
+export type BackgroundConfig = z.infer<typeof BackgroundConfigSchema>;
+
 export const EnvironmentConfigSchema = z.object({
   preset: z
     .enum(["city", "sunset", "dawn", "night", "warehouse", "forest", "apartment", "studio", "none"])
     .default("night"),
-  background: z
-    .object({
-      type: z.enum(["solid", "gradient", "transparent", "preset"]).default("transparent"),
-      color: z.string().default("#05070d"),
-      gradientColors: z.tuple([z.string(), z.string()]).optional(),
-    })
-    .default({}),
+  background: BackgroundConfigSchema,
   blur: z.number().min(0).max(1).default(0.8),
   fog: z
     .object({
@@ -80,6 +90,15 @@ export const EnvironmentConfigSchema = z.object({
       speed: z.number().default(0.5),
     })
     .default({}),
+  particles: z
+    .object({
+      enabled: z.boolean().default(true),
+      count: z.number().min(0).max(5000).default(800),
+      color: z.string().default("#00f0ff"),
+      size: z.number().min(0.001).max(0.5).default(0.03),
+      speed: z.number().min(0).max(5).default(0.3),
+    })
+    .optional(),
 });
 export type EnvironmentConfig = z.infer<typeof EnvironmentConfigSchema>;
 
@@ -146,6 +165,19 @@ export const ComponentTypeEnum = z.enum([
   "CrystalPrism",
   "InteractiveCard3D",
   "NeuralNodes",
+  // New Anime & Domain Procedural Nodes
+  "AnimeCharacterAvatar",
+  "MechaCore",
+  "SakuraPetalField",
+  "SpacePlanet",
+  "SatelliteOrbit",
+  "BuildingWireframe",
+  "CADStructure",
+  "AutomotiveChassis",
+  "MechanicalGears",
+  "TerminalCodeWall",
+  "ExecutiveMonolith",
+  "VoxelGrid",
 ]);
 export type ComponentType = z.infer<typeof ComponentTypeEnum>;
 

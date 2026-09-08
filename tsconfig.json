@@ -23,7 +23,11 @@
       "@zylo/three-engine": ["./packages/three-engine/src/index.ts"],
       "@zylo/three-engine/*": ["./packages/three-engine/src/*"],
       "@zylo/ai": ["./packages/ai/src/index.ts"],
-      "@zylo/ai/*": ["./packages/ai/src/*"]
+      "@zylo/ai/*": ["./packages/ai/src/*"],
+      "@zylo/templates": ["./packages/templates/src/index.ts"],
+      "@zylo/templates/*": ["./packages/templates/src/*"],
+      "@zylo/integrations": ["./packages/integrations/src/index.ts"],
+      "@zylo/integrations/*": ["./packages/integrations/src/*"]
     }
   },
   "include": [

@@ -1,4 +1,4 @@
-name: ZYLO CI Pipeline
+name: ZYLO Production CI/CD Pipeline
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [main, master, develop]
 
 jobs:
-  validate:
-    name: Typecheck, Lint, Test & Build
+  security-and-build:
+    name: Security, Lint, Typecheck, E2E & Production Build
     runs-on: ubuntu-latest
 
     env:
@@ -20,7 +20,7 @@ jobs:
       NODE_ENV: "test"
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js 20.x
@@ -32,17 +32,23 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Generate Prisma Client
+      - name: Generate Prisma Database Client
         run: npx prisma generate
+
+      - name: Automated Secret Scanner (Req 5 & 10)
+        run: node scripts/scan-secrets.mjs
 
       - name: TypeScript Type-Check
         run: npm run type-check
 
-      - name: ESLint Check
+      - name: ESLint Code Quality
         run: npm run lint
 
-      - name: Run Automated Unit Tests (Vitest)
+      - name: Run Full Vitest Test Suite (Unit + Integration)
         run: npm run test
 
-      - name: Production Build Verification
+      - name: Run Primary 24-Step Master E2E Test (Req 1)
+        run: npx vitest run tests/full-e2e-flow.test.ts
+
+      - name: Production Next.js Build Verification
         run: npm run build

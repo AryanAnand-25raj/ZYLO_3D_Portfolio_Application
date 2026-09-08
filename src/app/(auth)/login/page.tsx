@@ -42,6 +42,32 @@ export default function LoginPage() {
     }
   };
 
+  const handleQuickDemoLogin = async () => {
+    setEmail("founder@zylo.design");
+    setPassword("password123");
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        email: "founder@zylo.design",
+        password: "password123",
+      });
+
+      if (res?.error) {
+        setError("Could not sign in with demo credentials.");
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch {
+      setError("An unexpected error occurred during demo sign in.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-zylo-dark relative overflow-hidden">
       {/* Glow background */}
@@ -110,7 +136,7 @@ export default function LoginPage() {
           </form>
 
           {/* Quick Demo Access Pill */}
-          <div className="mt-6 p-3 rounded-xl bg-zylo-elevated border border-zylo-border text-xs space-y-1.5">
+          <div className="mt-6 p-3 rounded-xl bg-zylo-elevated border border-zylo-border text-xs space-y-2">
             <div className="flex items-center justify-between text-slate-300">
               <span className="font-semibold flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-zylo-cyan" /> Demo Foundation Account:
@@ -122,6 +148,16 @@ export default function LoginPage() {
             <div className="text-[11px] text-slate-400 font-mono">
               Email: <span className="text-zylo-cyan">founder@zylo.design</span>
             </div>
+            <Button
+              type="button"
+              onClick={handleQuickDemoLogin}
+              variant="outline"
+              size="sm"
+              className="w-full text-xs border-zylo-cyan/40 hover:bg-zylo-cyan/10 text-zylo-cyan hover:text-white gap-1.5 transition-colors"
+              disabled={loading}
+            >
+              <Sparkles className="w-3 h-3" /> Quick Sign In as Demo Founder
+            </Button>
           </div>
         </CardContent>
 

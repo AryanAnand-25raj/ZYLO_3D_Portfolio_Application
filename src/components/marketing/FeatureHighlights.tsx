@@ -3,6 +3,8 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   UserCheck,
   FileText,
@@ -13,6 +15,7 @@ import {
   CreditCard,
   ShieldCheck,
   Layers,
+  ArrowRight,
 } from "lucide-react";
 
 export const FeatureHighlights: React.FC = () => {
@@ -23,6 +26,7 @@ export const FeatureHighlights: React.FC = () => {
       description: "Secure profile authentication, multi-tenant accounts, roles, and session persistence via NextAuth & PostgreSQL.",
       badge: "Auth & Identity",
       color: "text-sky-400",
+      borderColor: "hover:border-sky-500/50",
     },
     {
       icon: FileText,
@@ -30,6 +34,7 @@ export const FeatureHighlights: React.FC = () => {
       description: "Validated structured data models for biographies, work experience, projects, skills, and credentials with Zod.",
       badge: "ContentSchema",
       color: "text-amber-400",
+      borderColor: "hover:border-amber-500/50",
     },
     {
       icon: Palette,
@@ -37,6 +42,7 @@ export const FeatureHighlights: React.FC = () => {
       description: "Declarative design tokens: HSL palettes, glassmorphism blur, typography scales, glowing borders, and animations.",
       badge: "ThemeSchema",
       color: "text-zylo-pink",
+      borderColor: "hover:border-pink-500/50",
     },
     {
       icon: Box,
@@ -44,6 +50,7 @@ export const FeatureHighlights: React.FC = () => {
       description: "Pure declarative scene graph defining camera matrices, dynamic light nodes, environment maps, and mesh hierarchies.",
       badge: "SceneSchema",
       color: "text-zylo-cyan",
+      borderColor: "hover:border-cyan-500/50",
     },
     {
       icon: Cpu,
@@ -51,6 +58,7 @@ export const FeatureHighlights: React.FC = () => {
       description: "Isolated @zylo/three-engine package with sandboxed ComponentRegistry preventing arbitrary script execution.",
       badge: "WebGL / R3F",
       color: "text-zylo-emerald",
+      borderColor: "hover:border-emerald-500/50",
     },
     {
       icon: Globe,
@@ -58,6 +66,7 @@ export const FeatureHighlights: React.FC = () => {
       description: "Static snapshot freezing, custom domains, subdomain routing, and automated SEO metadata generation.",
       badge: "Deployments",
       color: "text-zylo-purple",
+      borderColor: "hover:border-purple-500/50",
     },
     {
       icon: CreditCard,
@@ -65,11 +74,12 @@ export const FeatureHighlights: React.FC = () => {
       description: "Tiered subscription entitlements (Free, Pro, Agency), portfolio limits, and quota enforcement.",
       badge: "Subscriptions",
       color: "text-emerald-400",
+      borderColor: "hover:border-emerald-500/50",
     },
   ];
 
   return (
-    <section id="features" className="py-24 border-t border-zylo-border relative bg-zylo-dark">
+    <section id="features" className="py-24 border-t border-zylo-border relative bg-zylo-dark scroll-mt-16">
       <div className="container max-w-7xl px-4 sm:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
           <Badge variant="purple" className="gap-1.5 px-3 py-1">
@@ -90,7 +100,7 @@ export const FeatureHighlights: React.FC = () => {
             return (
               <Card
                 key={index}
-                className="glass-panel glass-panel-hover border-zylo-border/80 flex flex-col justify-between"
+                className={`glass-panel glass-panel-hover border-zylo-border/80 ${domain.borderColor} flex flex-col justify-between transition-all duration-300 hover:shadow-xl`}
               >
                 <CardHeader className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -112,10 +122,10 @@ export const FeatureHighlights: React.FC = () => {
             );
           })}
 
-          {/* Sandboxing & Security Spotlight Card */}
-          <Card className="glass-panel border-zylo-cyan/30 bg-gradient-to-br from-zylo-cyan/5 to-zylo-purple/5 md:col-span-2 lg:col-span-2 flex flex-col justify-center p-6">
+          {/* Sandboxing & Security Spotlight Card with Link to /architecture */}
+          <Card className="glass-panel border-zylo-cyan/30 bg-gradient-to-br from-zylo-cyan/5 to-zylo-purple/5 md:col-span-2 lg:col-span-2 flex flex-col justify-between p-6 shadow-xl">
             <div className="flex items-start gap-4">
-              <div className="p-3 rounded-xl bg-zylo-cyan/10 border border-zylo-cyan/30">
+              <div className="p-3 rounded-xl bg-zylo-cyan/10 border border-zylo-cyan/30 shrink-0">
                 <ShieldCheck className="w-8 h-8 text-zylo-cyan" />
               </div>
               <div className="space-y-2">
@@ -128,6 +138,18 @@ export const FeatureHighlights: React.FC = () => {
                   are constructed from pre-compiled, verified WebGL building blocks.
                 </p>
               </div>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-4">
+              <span className="text-xs font-mono text-slate-400">
+                Read the architectural specification and threat modeling docs.
+              </span>
+              <Link href="/architecture">
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs text-zylo-cyan border-zylo-cyan/30 hover:bg-zylo-cyan/10">
+                  <span>Explore Architecture Blueprint</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
             </div>
           </Card>
         </div>

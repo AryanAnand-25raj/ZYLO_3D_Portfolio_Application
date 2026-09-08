@@ -1,14 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Layers, Box, LogIn, LayoutDashboard } from "lucide-react";
+import { Sparkles, Layers, Box, LogIn, LayoutDashboard, Menu, X, CreditCard, ArrowRight } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const { data: session } = useSession();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zylo-border bg-zylo-dark/80 backdrop-blur-xl">
@@ -27,18 +28,24 @@ export const Navbar: React.FC = () => {
           </div>
         </Link>
 
-        {/* Navigation Links */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-          <Link href="#features" className="hover:text-zylo-cyan transition-colors flex items-center gap-1.5">
+        {/* Desktop Navigation Links */}
+        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-muted-foreground">
+          <Link href="/architecture" className="hover:text-zylo-cyan transition-colors flex items-center gap-1.5">
             <Layers className="w-4 h-4" /> Architecture
           </Link>
-          <Link href="#interactive-demo" className="hover:text-zylo-cyan transition-colors flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4" /> 3D Engine
+          <Link href="/3d-test" className="hover:text-zylo-cyan transition-colors flex items-center gap-1.5 text-white">
+            <Sparkles className="w-4 h-4 text-zylo-cyan" /> 3D Engine
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-zylo-cyan/15 text-zylo-cyan font-mono border border-zylo-cyan/30">
+              Live
+            </span>
           </Link>
-          <Link href="#pricing" className="hover:text-zylo-cyan transition-colors">
-            Pricing
+          <Link href="/pricing" className="hover:text-zylo-cyan transition-colors flex items-center gap-1.5">
+            <CreditCard className="w-4 h-4 text-emerald-400" /> Pricing
           </Link>
-          <Link href="https://github.com" target="_blank" className="hover:text-zylo-cyan transition-colors">
+          <Link href="/templates" className="hover:text-zylo-cyan transition-colors">
+            Templates
+          </Link>
+          <Link href="/docs" className="hover:text-zylo-cyan transition-colors">
             Docs
           </Link>
         </nav>
@@ -54,19 +61,95 @@ export const Navbar: React.FC = () => {
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" size="sm" className="gap-1.5 text-slate-300 hover:text-white">
+                <Button variant="ghost" size="sm" className="gap-1.5 text-slate-300 hover:text-white hidden sm:inline-flex">
                   <LogIn className="w-4 h-4" /> Sign In
                 </Button>
               </Link>
-              <Link href="/dashboard">
-                <Button variant="neon" size="sm" className="gap-1.5 hidden sm:inline-flex">
-                  Explore Studio
+              <Link href="/register">
+                <Button variant="glow" size="sm" className="gap-1.5 hidden sm:inline-flex">
+                  Get Started <ArrowRight className="w-3.5 h-3.5" />
                 </Button>
               </Link>
             </>
           )}
+
+          {/* Mobile Menu Toggle Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+            aria-label="Toggle Navigation Menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Drawer Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-b border-zylo-border bg-zylo-surface/95 backdrop-blur-2xl px-6 py-5 space-y-4">
+          <nav className="flex flex-col space-y-3 text-sm font-medium">
+            <Link
+              href="/pricing"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-zylo-cyan font-semibold flex items-center gap-2 py-1.5"
+            >
+              <CreditCard className="w-4 h-4" /> Pricing & Plans
+            </Link>
+            <Link
+              href="/3d-test"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-slate-300 hover:text-white flex items-center gap-2 py-1.5"
+            >
+              <Sparkles className="w-4 h-4 text-zylo-cyan" /> 3D Engine Testbed (Live)
+            </Link>
+            <Link
+              href="/architecture"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-slate-300 hover:text-white flex items-center gap-2 py-1.5"
+            >
+              <Layers className="w-4 h-4" /> System Architecture
+            </Link>
+            <Link
+              href="/templates"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-slate-300 hover:text-white flex items-center gap-2 py-1.5"
+            >
+              Templates
+            </Link>
+            <Link
+              href="/docs"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-slate-300 hover:text-white flex items-center gap-2 py-1.5"
+            >
+              Technical Docs
+            </Link>
+          </nav>
+
+          <div className="pt-3 border-t border-zylo-border flex flex-col gap-2.5">
+            {session ? (
+              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="glow" className="w-full text-xs gap-2">
+                  <LayoutDashboard className="w-4 h-4" /> Go to Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="glow" className="w-full text-xs gap-1.5">
+                    Get Started Free <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full text-xs">
+                    <LogIn className="w-3.5 h-3.5 mr-1.5" /> Sign In
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 };
+

@@ -15,6 +15,7 @@ enum UserRole {
   USER
   CREATOR
   ADMIN
+  SUPER_ADMIN
 }
 
 model User {
@@ -24,6 +25,8 @@ model User {
   emailVerified DateTime?
   image         String?
   role          UserRole          @default(USER)
+  accountStatus String            @default("ACTIVE") @map("account_status") // ACTIVE, SUSPENDED, DELETED
+  analyticsOptOut Boolean         @default(false) @map("analytics_opt_out")
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
@@ -35,7 +38,13 @@ model User {
   drafts        PortfolioDraft[]
   aiJobs        AIJob[]
   aiUsages      AIUsage[]
+  integrations  Integration[]
+  payments      Payment[]
+  invoices      Invoice[]
+  auditLogs     AuditLog[]
 
+  @@index([role])
+  @@index([accountStatus])
   @@map("users")
 }
 
@@ -56,6 +65,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
   @@map("accounts")
 }
 
@@ -66,6 +76,7 @@ model Session {
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("sessions")
 }
 
@@ -150,6 +161,7 @@ model PortfolioDraft {
   conflicts         DataConflictRecord[]
 
   @@index([userId])
+  @@index([updatedAt])
   @@map("portfolio_drafts")
 }
 
@@ -208,6 +220,8 @@ model AIJob {
 
   @@index([userId])
   @@index([status])
+  @@index([portfolioId])
+  @@index([createdAt])
   @@map("ai_jobs")
 }
 
@@ -227,6 +241,7 @@ model AIUsage {
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([createdAt])
   @@map("ai_usages")
 }
 
@@ -250,9 +265,15 @@ model Portfolio {
   design       PortfolioDesign?
   scene        PortfolioScene?
   deployments  Deployment[]
+  published    PublishedPortfolio?
+  domains      Domain[]
+  analyticsEvents AnalyticsEvent[]
+  visits       PortfolioVisit[]
 
   @@index([userId])
   @@index([slug])
+  @@index([isPublished])
+  @@index([customDomain])
   @@map("portfolios")
 }
 
@@ -323,20 +344,65 @@ enum DeploymentStatus {
 }
 
 model Deployment {
-  id          String           @id @default(cuid())
-  portfolioId String           @map("portfolio_id")
-  version     Int              @default(1)
-  status      DeploymentStatus @default(QUEUED)
-  domain      String?
-  snapshot    Json
-  errorMsg    String?          @map("error_msg")
-  deployedAt  DateTime?        @map("deployed_at")
-  createdAt   DateTime         @default(now())
+  id            String           @id @default(cuid())
+  portfolioId   String           @map("portfolio_id")
+  versionNumber Int              @default(1) @map("version_number")
+  versionId     String?          @map("version_id")
+  status        DeploymentStatus @default(QUEUED)
+  provider      String           @default("edge_cdn")
+  domain        String?
+  deploymentUrl String?          @map("deployment_url")
+  snapshot      Json
+  logs          Json?
+  errorMsg      String?          @map("error_msg")
+  startedAt     DateTime         @default(now()) @map("started_at")
+  completedAt   DateTime?        @map("completed_at")
+  deployedAt    DateTime?        @map("deployed_at")
+  createdAt     DateTime         @default(now())
 
-  portfolio   Portfolio        @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio     Portfolio        @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
   @@index([portfolioId])
+  @@index([status])
+  @@index([deployedAt])
   @@map("deployments")
+}
+
+model PublishedPortfolio {
+  id            String    @id @default(cuid())
+  portfolioId   String    @unique @map("portfolio_id")
+  versionNumber Int       @default(1) @map("version_number")
+  versionId     String    @map("version_id")
+  slug          String    @unique
+  status        String    @default("published") // published, unpublished
+  deploymentUrl String    @map("deployment_url")
+  snapshot      Json      // Immutable deep snapshot of PortfolioData
+  publishedAt   DateTime  @default(now()) @map("published_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  portfolio     Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([slug])
+  @@map("published_portfolios")
+}
+
+model Domain {
+  id                String    @id @default(cuid())
+  portfolioId       String    @map("portfolio_id")
+  hostname          String    @unique
+  type              String    @default("subdomain") // apex, subdomain
+  status            String    @default("pending")   // pending, verified, failed
+  verificationToken String    @map("verification_token")
+  sslStatus         String    @default("pending")   // pending, active, failed
+  verifiedAt        DateTime? @map("verified_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  portfolio         Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
+  @@index([hostname])
+  @@map("domains")
 }
 
 enum SubscriptionTier {
@@ -350,24 +416,245 @@ enum SubscriptionStatus {
   PAST_DUE
   CANCELED
   TRIALING
+  PAUSED
+  EXPIRED
+}
+
+model Plan {
+  id              String                @id @default(cuid())
+  code            String                @unique // STARTER, PRO, AGENCY
+  name            String
+  description     String?
+  priceInr        Int                   // Smallest unit (e.g. 50000 = ₹500)
+  priceUsd        Int                   // Smallest unit (e.g. 4900 = $49)
+  billingInterval String                @default("month") // month, year, one_time
+  isPopular       Boolean               @default(false)
+  isActive        Boolean               @default(true)
+  entitlements    FeatureEntitlement[]
+  subscriptions   Subscription[]
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@map("plans")
+}
+
+model FeatureEntitlement {
+  id         String   @id @default(cuid())
+  planId     String   @map("plan_id")
+  featureKey String   @map("feature_key")
+  enabled    Boolean  @default(true)
+  limit      Int?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  plan       Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, featureKey])
+  @@map("feature_entitlements")
 }
 
 model Subscription {
-  id                   String             @id @default(cuid())
-  userId               String             @unique @map("user_id")
-  tier                 SubscriptionTier   @default(FREE)
-  status               SubscriptionStatus @default(ACTIVE)
-  stripeCustomerId     String?            @unique @map("stripe_customer_id")
-  stripeSubscriptionId String?            @unique @map("stripe_subscription_id")
-  stripePriceId        String?            @map("stripe_price_id")
-  currentPeriodEnd     DateTime?          @map("current_period_end")
-  maxPortfolios        Int                @default(1) @map("max_portfolios")
-  customDomainEnabled  Boolean            @default(false) @map("custom_domain_enabled")
-  aiGenerationQuota    Int                @default(5) @map("ai_generation_quota")
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+  id                     String             @id @default(cuid())
+  userId                 String             @unique @map("user_id")
+  planId                 String?            @map("plan_id")
+  tier                   SubscriptionTier   @default(FREE)
+  status                 SubscriptionStatus @default(ACTIVE)
+  provider               String             @default("stripe") // stripe, razorpay, mock
+  providerCustomerId     String?            @map("provider_customer_id")
+  providerSubscriptionId String?            @map("provider_subscription_id")
+  currentPeriodStart     DateTime?          @map("current_period_start")
+  currentPeriodEnd       DateTime?          @map("current_period_end")
+  cancelAtPeriodEnd      Boolean            @default(false) @map("cancel_at_period_end")
+  canceledAt             DateTime?          @map("canceled_at")
+  stripeCustomerId       String?            @unique @map("stripe_customer_id")
+  stripeSubscriptionId   String?            @unique @map("stripe_subscription_id")
+  stripePriceId          String?            @map("stripe_price_id")
+  maxPortfolios          Int                @default(1) @map("max_portfolios")
+  customDomainEnabled    Boolean            @default(false) @map("custom_domain_enabled")
+  aiGenerationQuota      Int                @default(5) @map("ai_generation_quota")
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
 
-  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan                   Plan?              @relation(fields: [planId], references: [id], onDelete: SetNull)
+  payments               Payment[]
+  invoices               Invoice[]
 
+  @@index([userId])
+  @@index([status])
+  @@index([tier])
   @@map("subscriptions")
 }
+
+model Payment {
+  id                String        @id @default(cuid())
+  userId            String        @map("user_id")
+  subscriptionId    String?       @map("subscription_id")
+  provider          String        // stripe, razorpay, mock
+  providerPaymentId String?       @unique @map("provider_payment_id")
+  providerOrderId   String?       @map("provider_order_id")
+  amount            Int           // Smallest unit (e.g. 50000 paise / 4900 cents)
+  currency          String        // INR, USD
+  status            String        @default("created") // created, pending, paid, failed, refunded, cancelled, expired
+  receiptUrl        String?       @map("receipt_url")
+  errorMessage      String?       @map("error_message")
+  refundedAmount    Int           @default(0) @map("refunded_amount")
+  metadata          Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription      Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([providerPaymentId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+model PaymentEvent {
+  id          String    @id @default(cuid())
+  provider    String    // stripe, razorpay, mock
+  eventId     String    @unique @map("event_id") // Idempotency key
+  eventType   String    @map("event_type")
+  payload     Json
+  processed   Boolean   @default(false)
+  processedAt DateTime? @map("processed_at")
+  createdAt   DateTime  @default(now())
+
+  @@index([provider, eventId])
+  @@map("payment_events")
+}
+
+model Invoice {
+  id               String        @id @default(cuid())
+  userId           String        @map("user_id")
+  subscriptionId   String?       @map("subscription_id")
+  paymentId        String?       @map("payment_id")
+  invoiceNumber    String        @unique @map("invoice_number")
+  amount           Int
+  currency         String
+  status           String        @default("paid") // paid, open, void
+  hostedInvoiceUrl String?       @map("hosted_invoice_url")
+  pdfUrl           String?       @map("pdf_url")
+  periodStart      DateTime      @map("period_start")
+  periodEnd        DateTime      @map("period_end")
+  paidAt           DateTime?     @map("paid_at")
+  createdAt        DateTime      @default(now())
+
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription     Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([invoiceNumber])
+  @@map("invoices")
+}
+
+// ----------------------------------------------------
+// 6. PROFESSIONAL PROFILE INTEGRATIONS DOMAIN (TASK 08)
+// ----------------------------------------------------
+
+enum IntegrationProvider {
+  GITHUB
+  LINKEDIN
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  EXPIRED
+  REVOKED
+  LIMITED_PERMISSIONS
+  ERROR
+}
+
+model Integration {
+  id                    String              @id @default(cuid())
+  userId                String              @map("user_id")
+  provider              IntegrationProvider
+  status                IntegrationStatus   @default(CONNECTED)
+  externalAccountId     String              @map("external_account_id")
+  externalUsername      String?             @map("external_username")
+  scopes                String[]            @default([])
+  encryptedAccessToken  String              @map("encrypted_access_token") @db.Text
+  encryptedRefreshToken String?             @map("encrypted_refresh_token") @db.Text
+  tokenExpiresAt        DateTime?           @map("token_expires_at")
+  lastSyncedAt          DateTime?           @map("last_synced_at")
+  metadata              Json?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@map("integrations")
+}
+
+// ----------------------------------------------------
+// 7. ANALYTICS & VISITOR TELEMETRY DOMAIN (TASK 11)
+// ----------------------------------------------------
+
+model AnalyticsEvent {
+  id             String    @id @default(cuid())
+  portfolioId    String    @map("portfolio_id")
+  event          String    // page_view, project_view, contact_click, resume_download, github_click, linkedin_click, cta_click
+  path           String    @default("/")
+  deviceCategory String    @default("desktop") @map("device_category") // desktop, mobile, tablet
+  referrer       String?
+  countryRegion  String?   @map("country_region") // e.g. "US", "IN", "EU"
+  metadata       Json?
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  portfolio      Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId, createdAt])
+  @@index([portfolioId, event])
+  @@map("analytics_events")
+}
+
+model PortfolioVisit {
+  id             String    @id @default(cuid())
+  portfolioId    String    @map("portfolio_id")
+  visitorHash    String    @map("visitor_hash") // Privacy-safe daily salted hash (NOT raw IP)
+  deviceCategory String    @default("desktop") @map("device_category")
+  countryRegion  String?   @map("country_region")
+  referrer       String?
+  path           String    @default("/")
+  startedAt      DateTime  @default(now()) @map("started_at")
+  lastActiveAt   DateTime  @default(now()) @map("last_active_at")
+  durationSeconds Int      @default(0) @map("duration_seconds")
+
+  portfolio      Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId, startedAt])
+  @@index([visitorHash])
+  @@map("portfolio_visits")
+}
+
+// ----------------------------------------------------
+// 8. SECURITY & AUDIT LOGGING DOMAIN (TASK 11)
+// ----------------------------------------------------
+
+model AuditLog {
+  id             String    @id @default(cuid())
+  userId         String?   @map("user_id")
+  actorEmail     String?   @map("actor_email")
+  action         String    // AUTH_LOGIN_FAILED, ADMIN_USER_DISABLED, SUBSCRIPTION_CHANGED, DOMAIN_VERIFIED, etc.
+  targetResource String?   @map("target_resource") // user, portfolio, domain, subscription
+  targetId       String?   @map("target_id")
+  status         String    @default("SUCCESS") // SUCCESS, FAILURE
+  details        Json?     // Redacted JSON payload (no secrets)
+  ipAddress      String?   @map("ip_address") // Masked IP (e.g. 192.168.xxx.xxx)
+  userAgent      String?   @map("user_agent")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  user           User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+

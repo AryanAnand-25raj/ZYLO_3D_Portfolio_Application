@@ -1,3 +1,12 @@
+export * from "./types";
+export * from "./plans.config";
+export * from "./store";
+export * from "./entitlements";
+export * from "./providers";
+export * from "./providers/stripe.provider";
+export * from "./providers/razorpay.provider";
+
+// Backward-compatible adapters
 export type PlanTier = "FREE" | "PRO" | "AGENCY";
 
 export interface PlanFeatureLimits {

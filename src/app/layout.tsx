@@ -1,19 +1,7 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
-  display: "swap",
-});
+import { FeedbackModal } from "@/components/feedback/FeedbackModal";
 
 export const metadata: Metadata = {
   title: "ZYLO — AI-Powered 3D Portfolio Generator",
@@ -34,9 +22,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${outfit.variable}`}>
+    <html lang="en" className="dark">
       <body className="min-h-screen bg-zylo-dark text-foreground flex flex-col font-sans">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <FeedbackModal />
+        </AuthProvider>
       </body>
     </html>
   );

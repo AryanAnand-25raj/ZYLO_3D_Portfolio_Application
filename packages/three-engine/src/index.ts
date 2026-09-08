@@ -12,3 +12,4 @@ export * from "./fallbacks";
 export * from "./templates";
 export * from "./hooks";
 export * from "./core";
+export * from "./assets";

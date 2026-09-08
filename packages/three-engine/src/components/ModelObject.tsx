@@ -6,6 +6,7 @@ import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { SceneMeshNode } from "../schemas/scene.schema";
 import { getApprovedAsset } from "../registry/AssetRegistry";
+import { defaultAssetResolver } from "../assets/resolver";
 import { NodeComponentProps } from "./BasicGeometries";
 
 // Fallback proxy mesh when model is loading or assetId is not found
@@ -74,15 +75,18 @@ const GLTFModelInternal: React.FC<{ url: string; node: SceneMeshNode; isHovered?
 
 export const ModelObject: React.FC<NodeComponentProps> = (props) => {
   const { node } = props;
-  const asset = node.assetId ? getApprovedAsset(node.assetId) : null;
+  const legacyAsset = node.assetId ? getApprovedAsset(node.assetId) : null;
+  const resolved = defaultAssetResolver.resolveAsset(node.assetId);
 
-  if (!asset || !asset.url) {
+  const modelUrl = legacyAsset?.url || (resolved && !resolved.isFallback ? resolved.url : null);
+
+  if (!modelUrl) {
     return <ModelFallbackProxy {...props} />;
   }
 
   return (
     <Suspense fallback={<ModelFallbackProxy {...props} />}>
-      <GLTFModelInternal url={asset.url} node={node} isHovered={props.isHovered} onClick={props.onClick} />
+      <GLTFModelInternal url={modelUrl} node={node} isHovered={props.isHovered} onClick={props.onClick} />
     </Suspense>
   );
 };

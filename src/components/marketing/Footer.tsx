@@ -18,18 +18,27 @@ export const Footer: React.FC = () => {
           </span>
         </div>
 
-        <div className="flex items-center gap-6 text-xs">
-          <Link href="#architecture" className="hover:text-zylo-cyan transition-colors">
+        <div className="flex flex-wrap items-center gap-5 sm:gap-6 text-xs">
+          <Link href="/architecture" className="hover:text-zylo-cyan transition-colors">
             Architecture
           </Link>
-          <Link href="#pricing" className="hover:text-zylo-cyan transition-colors">
+          <Link href="/3d-test" className="hover:text-zylo-cyan transition-colors">
+            3D Engine
+          </Link>
+          <Link href="/templates" className="hover:text-zylo-cyan transition-colors">
+            Templates
+          </Link>
+          <Link href="/pricing" className="hover:text-zylo-cyan transition-colors">
             Pricing
           </Link>
+          <Link href="/docs" className="hover:text-zylo-cyan transition-colors">
+            Docs
+          </Link>
           <Link href="/privacy" className="hover:text-zylo-cyan transition-colors">
-            Privacy Policy
+            Privacy
           </Link>
           <Link href="/terms" className="hover:text-zylo-cyan transition-colors">
-            Terms of Service
+            Terms
           </Link>
         </div>
 
