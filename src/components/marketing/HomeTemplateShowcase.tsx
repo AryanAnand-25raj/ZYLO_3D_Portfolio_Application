@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { resolveTemplateWithFallback } from "@zylo/templates";
+import { SceneRenderer } from "@zylo/three-engine";
 import {
   Sparkles,
   ArrowRight,
@@ -190,44 +192,66 @@ export const HomeTemplateShowcase: React.FC = () => {
 
         {/* 3D Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
-          {filteredItems.map((item) => (
-            <TiltCard3D key={item.id} className="h-full">
-              <div
-                className={`h-full rounded-2xl glass-panel border ${item.borderColor} p-6 flex flex-col justify-between transition-all duration-300 bg-gradient-to-b ${item.gradient} hover:shadow-2xl relative overflow-hidden group`}
-                style={{
-                  boxShadow: `0 10px 30px -10px ${item.glowColor}`,
-                }}
-              >
-                {/* Top Telemetry Bar */}
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-4">
-                    <span
-                      className="px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold border"
-                      style={{
-                        color: item.accentColor,
-                        borderColor: `${item.accentColor}40`,
-                        backgroundColor: `${item.accentColor}15`,
-                      }}
-                    >
-                      {item.badge}
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-400 tracking-wider">
-                      {item.family}
-                    </span>
-                  </div>
+          {filteredItems.map((item) => {
+            const template = resolveTemplateWithFallback(item.id);
+            const liveScene = template?.defaultScene;
 
-                  <h3 className="text-xl font-heading font-bold text-white group-hover:text-zylo-cyan transition-colors">
-                    {item.name}
-                  </h3>
+            return (
+              <TiltCard3D key={item.id} className="h-full">
+                <div
+                  className={`h-full rounded-2xl glass-panel border ${item.borderColor} p-6 flex flex-col justify-between transition-all duration-300 bg-gradient-to-b ${item.gradient} hover:shadow-2xl relative overflow-hidden group`}
+                  style={{
+                    boxShadow: `0 10px 30px -10px ${item.glowColor}`,
+                  }}
+                >
+                  {/* Top Telemetry Bar */}
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-4">
+                      <span
+                        className="px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold border"
+                        style={{
+                          color: item.accentColor,
+                          borderColor: `${item.accentColor}40`,
+                          backgroundColor: `${item.accentColor}15`,
+                        }}
+                      >
+                        {item.badge}
+                      </span>
+                      <span className="text-[10px] font-mono text-slate-400 tracking-wider">
+                        {item.family}
+                      </span>
+                    </div>
 
-                  <div className="mt-2.5 px-2.5 py-1.5 rounded bg-black/50 border border-white/5 text-[10px] font-mono text-slate-300 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: item.accentColor }} />
-                    <span className="truncate">{item.telemetry}</span>
-                  </div>
+                    <h3 className="text-xl font-heading font-bold text-white group-hover:text-zylo-cyan transition-colors">
+                      {item.name}
+                    </h3>
 
-                  <p className="text-xs text-slate-300 mt-3.5 leading-relaxed">
-                    {item.description}
-                  </p>
+                    {/* Live 3D WebGL Viewport */}
+                    {liveScene && (
+                      <div className="relative w-full h-48 my-3.5 rounded-xl overflow-hidden bg-black/60 border border-white/10 group-hover:border-white/20 transition-all shadow-inner">
+                        <SceneRenderer
+                          sceneConfig={liveScene}
+                          interactive={false}
+                          autoRotate={true}
+                          className="w-full h-full"
+                        />
+                        <div className="absolute top-2.5 right-2.5 pointer-events-none z-10 flex items-center gap-1.5">
+                          <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-black/80 backdrop-blur-md text-zylo-cyan border border-zylo-cyan/30 flex items-center gap-1 shadow-md">
+                            <Box className="w-3 h-3 text-zylo-cyan" />
+                            {liveScene.nodes[0]?.componentType || "3D Node"}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="mt-2.5 px-2.5 py-1.5 rounded bg-black/50 border border-white/5 text-[10px] font-mono text-slate-300 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: item.accentColor }} />
+                      <span className="truncate">{item.telemetry}</span>
+                    </div>
+
+                    <p className="text-xs text-slate-300 mt-3.5 leading-relaxed">
+                      {item.description}
+                    </p>
 
                   <div className="mt-4 pt-3 border-t border-white/5">
                     <span className="text-[11px] text-slate-400 font-mono block mb-2">Best for:</span>
@@ -271,7 +295,8 @@ export const HomeTemplateShowcase: React.FC = () => {
                 </div>
               </div>
             </TiltCard3D>
-          ))}
+            );
+          })}
         </div>
 
         {/* Explore Full Catalog Banner */}

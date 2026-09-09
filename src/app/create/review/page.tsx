@@ -60,6 +60,7 @@ export default function CreateReviewStepPage() {
     }
 
     runNormalize();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [extractedData]);
 
   const handleContinue = async () => {

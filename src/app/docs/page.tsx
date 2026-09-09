@@ -32,7 +32,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-export default function DocsPage() {
+function DocsContent() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") || "3d-engine";
   const [activeTab, setActiveTab] = useState<string>(initialTab);
@@ -791,5 +791,13 @@ nodes: Array<SceneNode>`}</pre>
 
       <Footer />
     </div>
+  );
+}
+
+export default function DocsPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen bg-zylo-dark" />}>
+      <DocsContent />
+    </React.Suspense>
   );
 }

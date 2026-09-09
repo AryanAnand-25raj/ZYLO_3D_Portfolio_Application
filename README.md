@@ -16,9 +16,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4_Strict-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14_App_Router-black.svg?logo=next.js)](https://nextjs.org/)
 [![Three.js](https://img.shields.io/badge/Three.js-R3F_%26_Drei-black.svg?logo=three.js)](https://threejs.org/)
-[![Tests](https://img.shields.io/badge/Tests-234%20Passing-brightgreen.svg?logo=vitest)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-235%20Passing-brightgreen.svg?logo=vitest)](https://vitest.dev/)
 [![Security](https://img.shields.io/badge/Security-Zero_Arbitrary_JS-emerald.svg)](https://github.com)
-[![Presets](https://img.shields.io/badge/Templates-100%2B_3D_Presets-magenta.svg)](http://localhost:3000/templates)
+[![Presets](https://img.shields.io/badge/Templates-100%2B_Diverse_3D_Renders-magenta.svg)](http://localhost:3000/templates)
 
 <br />
 
@@ -385,6 +385,35 @@ graph LR
   - Spatial **Call to Action 3D Warp Portal**.
 - **Resolved font loading timeout (`ECONNRESET`)**: Migrated from server-side `next/font/google` binary fetches to clean client-side CSS variables, permanently resolving the Next.js `! 1 error` dev overlay.
 - **100% Link Connectivity ("Liabilities")**: Connected all navigation routes, pricing portals, architecture blueprints, templates, legal policies (Privacy/Terms), authentication, and interactive feedback modal.
+
+### ✅ TASK 13 — Complete 3D Render Template Diversification & Interactive 3D Studio
+- **Unique 3D Scenes Across All 100 Presets**: Overhauled `packages/templates/src/presets/catalog.ts` so every preset in the 100-preset catalog receives a unique `SceneConfig` mapping to signature procedural 3D components:
+  - `AnimeCharacterAvatar` (Manga cel-shaded bust with visor & horns)
+  - `SakuraPetalField` (Drifting cherry blossom petals with spirit orb)
+  - `MechaCore` (Hexagonal reactor turbine core with kinetic vents)
+  - `SpacePlanet` (Saturn-ringed celestial sphere with atmospheric glow)
+  - `SatelliteOrbit` (CubeSat / space satellite with dual solar arrays and dish antenna)
+  - `BuildingWireframe` (Multi-tier skyscraper blueprint wireframe with spire)
+  - `CADStructure` (Engineering structural truss grid / isometric space-frame)
+  - `AutomotiveChassis` (Aerodynamic supercar silhouette with rotating wheel discs)
+  - `MechanicalGears` (Dual counter-rotating horology clockwork gears)
+  - `TerminalCodeWall` (Matrix holographic code wall with blinking prompt cursor)
+  - `ExecutiveMonolith` (Titanium/gold executive obelisk with dual gyroscopic rings)
+  - `VoxelGrid` (Real-time pulsating 3x3 voxel heightfield matrix)
+  - `CrystalPrism` (Faceted refractive diamond crystal prism)
+  - `TorusKnotCore`, `GeometricCluster`, `ParticleVortex`, `CyberGrid`, `NeuralNodes`, `NeonRings`, `SphereOrb`, `FloatingMeshNode`.
+- **Dynamic Palette & Lighting Synchronization**: Every 3D mesh node's material is dynamically customized with the preset's primary and secondary emissive colors. Key and rim lights cast contrasting directional light matching the preset's theme.
+- **Interactive 3D Stage in Template Studio (`/templates`)**:
+  - Live interactive WebGL `<SceneRenderer>` viewport for the inspected preset with orbit controls, mouse parallax, auto-rotate toggle, and camera FOV/DPR telemetry.
+  - Quick 3D Geometry Filter pills allowing one-click filtering by 3D object type (`✦ Mecha Core`, `✦ Space Planet`, `✦ CAD Structure`, `✦ Skyscraper`, `✦ Supercar`, `✦ Clockwork`, `✦ Terminal Matrix`, `✦ Voxel Grid`, etc.).
+  - Zero-Crash Virtualization: Replaced 100 simultaneous WebGL canvases with hardware-accelerated SVG 3D wireframe previews and radiant radial gradients, completely eliminating browser WebGL context exhaustion.
+- **Live 3D Viewports in Homepage Showcase**:
+  - Embedded real, live WebGL `<SceneRenderer>` canvases inside each of the 6 flagship showcase cards on the homepage (`/`), providing instant rotating 3D visuals on first impression.
+- **Complete Build & System Hardening**:
+  - Fixed `/docs` static generation by wrapping `useSearchParams()` in `<React.Suspense>`.
+  - Added `export const dynamic = "force-dynamic"` to all dynamic App Router API routes.
+  - Added Windows ARM64 fallback in `src/lib/db.ts` to prevent Prisma native binary crashes.
+  - All 28 Vitest test suites (235 tests) passing with 0 errors.
 
 ---
 

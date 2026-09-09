@@ -5,6 +5,8 @@ import { BillingStoreManager } from "@/modules/billing/store";
 import { PlanService, PLANS } from "@/modules/billing/plans.config";
 import { EntitlementService } from "@/modules/billing/entitlements";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req?: NextRequest) {
   try {
     const session = await getServerSession(authOptions).catch(() => null);

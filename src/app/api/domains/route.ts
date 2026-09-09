@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { DomainService } from "@/modules/publishing/domains";
 import { PublishingStoreManager } from "@/modules/publishing/store";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

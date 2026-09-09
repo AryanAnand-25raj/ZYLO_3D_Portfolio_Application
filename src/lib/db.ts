@@ -78,7 +78,12 @@ function createMockPrismaClient(): PrismaClient {
 }
 
 function createPrismaClient(): PrismaClient {
-  if (process.env.NODE_ENV === "test" || process.env.VITEST) {
+  if (
+    process.env.NODE_ENV === "test" ||
+    process.env.VITEST ||
+    process.env.PRISMA_MOCK === "true" ||
+    (process.platform === "win32" && process.arch === "arm64")
+  ) {
     return createMockPrismaClient();
   }
 

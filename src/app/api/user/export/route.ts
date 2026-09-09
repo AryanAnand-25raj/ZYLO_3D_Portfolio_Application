@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { DataLifecycleService } from "@/modules/security/data-lifecycle";
 import { CentralRateLimiter } from "@/modules/security/rate-limiter";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions).catch(() => null);

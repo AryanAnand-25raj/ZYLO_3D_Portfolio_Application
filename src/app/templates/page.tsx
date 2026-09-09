@@ -26,7 +26,7 @@ import {
 export default function TemplatesShowcasePage() {
   const [activeTemplateId, setActiveTemplateId] = useState<string>("orbit");
   const [enable3D, setEnable3D] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<"preview" | "gallery" | "migration">("preview");
+  const [activeTab, setActiveTab] = useState<"preview" | "gallery" | "migration">("gallery");
   const [migrationLogs, setMigrationLogs] = useState<string[]>([
     "Initialized default Orbit template (orbit@1.0.0)",
   ]);

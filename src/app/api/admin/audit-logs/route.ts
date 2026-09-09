@@ -3,6 +3,8 @@ import { RBACService } from "@/modules/security/rbac";
 import { AuditLogger } from "@/modules/security/audit-logger";
 import { AuditAction } from "@/modules/security/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   const auth = await RBACService.verifyAdmin(req);
   if (!auth.authorized) {

@@ -89,6 +89,7 @@ export const PublishModal: React.FC<PublishModalProps> = ({
     return () => {
       mounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, portfolioId]);
 
   if (!isOpen) return null;

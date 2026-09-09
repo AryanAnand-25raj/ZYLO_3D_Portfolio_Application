@@ -211,6 +211,41 @@ describe("Template System — Schemas & Defaults", () => {
     expect(sakuraRpg.name).toContain("Sakura");
     expect(sakuraRpg.category).toBe("Anime & Character");
   });
+
+  it("verifies that each 3D render template preset has a unique, distinct 3D scene and diversified geometry", () => {
+    const sceneIds = new Set<string>();
+    const componentTypes = new Set<string>();
+
+    for (const preset of PRESET_CATALOG) {
+      expect(preset.defaultScene).toBeDefined();
+      expect(preset.defaultScene.nodes.length).toBeGreaterThan(0);
+      sceneIds.add(preset.defaultScene.id);
+
+      const primaryNode = preset.defaultScene.nodes[0];
+      componentTypes.add(primaryNode.componentType);
+
+      // Node colors should match preset primary/secondary colors
+      expect(primaryNode.materialProps.color).toBe(preset.defaultTheme.colors?.primary);
+    }
+
+    // All 100 presets must have distinct scene IDs
+    expect(sceneIds.size).toBe(100);
+
+    // Must utilize a wide variety of 3D procedural components (at least 18 distinct types)
+    expect(componentTypes.size).toBeGreaterThanOrEqual(18);
+    expect(componentTypes.has("AnimeCharacterAvatar")).toBe(true);
+    expect(componentTypes.has("MechaCore")).toBe(true);
+    expect(componentTypes.has("SpacePlanet")).toBe(true);
+    expect(componentTypes.has("SatelliteOrbit")).toBe(true);
+    expect(componentTypes.has("BuildingWireframe")).toBe(true);
+    expect(componentTypes.has("CADStructure")).toBe(true);
+    expect(componentTypes.has("AutomotiveChassis")).toBe(true);
+    expect(componentTypes.has("MechanicalGears")).toBe(true);
+    expect(componentTypes.has("TerminalCodeWall")).toBe(true);
+    expect(componentTypes.has("ExecutiveMonolith")).toBe(true);
+    expect(componentTypes.has("VoxelGrid")).toBe(true);
+    expect(componentTypes.has("CrystalPrism")).toBe(true);
+  });
 });
 
 describe("Template System — Capabilities & Compatibility", () => {

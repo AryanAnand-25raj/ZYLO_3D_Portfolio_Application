@@ -8,6 +8,8 @@ import {
 } from "@zylo/integrations";
 import { IntegrationStorageManager } from "@/modules/integrations/storage";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;

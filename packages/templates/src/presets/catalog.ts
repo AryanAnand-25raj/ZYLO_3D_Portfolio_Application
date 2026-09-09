@@ -13,6 +13,8 @@ import { cyberpunkTemplate } from "../cyberpunk/cyberpunk.template";
 import { matrixTemplate } from "../matrix/matrix.template";
 import { spatialTemplate } from "../spatial/spatial.template";
 
+import { ComponentType, SceneMeshNode } from "@zylo/three-engine";
+
 export interface PresetCatalogItem extends TemplateDefinition {
   family:
     | "Anime & Character"
@@ -29,6 +31,344 @@ export interface PresetCatalogItem extends TemplateDefinition {
   tags: string[];
 }
 
+// Explicit mapping of preset IDs to signature 3D Procedural Mesh components
+const PRESET_COMPONENT_MAP: Record<string, ComponentType> = {
+  // Family 1: Anime & Character (1-10)
+  "anime-neo-tokyo": "AnimeCharacterAvatar",
+  "anime-sakura-rpg": "SakuraPetalField",
+  "anime-mecha-striker": "MechaCore",
+  "anime-vtuber-streamer": "HologramPillar",
+  "anime-cyber-ninja": "TorusKnotCore",
+  "anime-kawaii-pastel": "FloatingMeshNode",
+  "anime-manga-ink": "GeometricCluster",
+  "anime-shrine-mystic": "CrystalPrism",
+  "anime-cyber-alchemist": "NeonRings",
+  "anime-retro-vapor": "CyberGrid",
+
+  // Family 2: AI & Tech (11-20)
+  "ai-fusion": "NeuralNodes",
+  "ai-fluence": "ParticleVortex",
+  "ai-mahadeva": "VoxelGrid",
+  "ai-agentory": "HologramPillar",
+  "ai-synaptic-vortex": "ParticleVortex",
+  "ai-voxel-matrix": "VoxelGrid",
+  "ai-robotics-kinematics": "MechaCore",
+  "ai-generative-synth": "CrystalPrism",
+  "ai-tensor-flow": "CADStructure",
+  "ai-neuromorphic": "NeuralNodes",
+
+  // Family 3: Space & Sci-Fi (21-30)
+  "space-orbital-rings": "SpacePlanet",
+  "space-deep-voyager": "ParticleVortex",
+  "space-lunar-architect": "BuildingWireframe",
+  "space-mars-colonizer": "SpacePlanet",
+  "space-cubesat-array": "SatelliteOrbit",
+  "space-blackhole-lens": "TorusKnotCore",
+  "space-exoplanet-survey": "SpacePlanet",
+  "space-rocket-propulsion": "MechaCore",
+  "space-james-webb": "GeometricCluster",
+  "space-interstellar-relay": "SatelliteOrbit",
+
+  // Family 4: 3D Creative (31-40)
+  "creative-inky": "TorusKnotCore",
+  "creative-mono-x": "GeometricCluster",
+  "creative-portfolite": "FloatingMeshNode",
+  "creative-majd": "CrystalPrism",
+  "creative-iridescent-chrome": "SphereOrb",
+  "creative-hologram-foil": "HologramPillar",
+  "creative-kinetic-bauhaus": "GeometricCluster",
+  "creative-organic-biomimicry": "ParticleVortex",
+  "creative-sound-reactive": "NeonRings",
+  "creative-chromatic-flow": "TorusKnotCore",
+
+  // Family 5: Glassmorphism (41-50)
+  "glass-aura-saas": "CrystalPrism",
+  "glass-prismatic-refraction": "CrystalPrism",
+  "glass-liquid-bento": "FloatingMeshNode",
+  "glass-obsidian-dark": "ExecutiveMonolith",
+  "glass-opal-diffuse": "SphereOrb",
+  "glass-spectral-dispersion": "CrystalPrism",
+  "glass-frosted-aero": "NeonRings",
+  "glass-quartz-monolith": "CrystalPrism",
+  "glass-icefield-minimal": "GeometricCluster",
+  "glass-amber-refraction": "TorusKnotCore",
+
+  // Family 6: Developer & Cyber (51-60)
+  "cyber-terminal-matrix": "TerminalCodeWall",
+  "cyber-devops-cluster": "VoxelGrid",
+  "cyber-threat-hunter": "CyberGrid",
+  "cyber-web3-forge": "CADStructure",
+  "cyber-kernel-systems": "TerminalCodeWall",
+  "cyber-glitch-syndicate": "ParticleVortex",
+  "cyber-api-mesh": "NeuralNodes",
+  "cyber-quantum-crypto": "CrystalPrism",
+  "cyber-database-internals": "MechanicalGears",
+  "cyber-fullstack-neon": "NeonRings",
+
+  // Family 7: Corporate & Professional (61-70)
+  "corporate-executive-monolith": "ExecutiveMonolith",
+  "corporate-fintech-ledger": "GeometricCluster",
+  "corporate-vc-partner": "ExecutiveMonolith",
+  "corporate-management-consulting": "CADStructure",
+  "corporate-swiss-minimal": "FloatingMeshNode",
+  "corporate-private-equity": "ExecutiveMonolith",
+  "corporate-legal-governance": "ExecutiveMonolith",
+  "corporate-enterprise-csuite": "NeuralNodes",
+  "corporate-esg-sustainable": "SphereOrb",
+  "corporate-mba-fellow": "ExecutiveMonolith",
+
+  // Family 8: Architecture & Engineering (71-80)
+  "arch-blueprint-wireframe": "BuildingWireframe",
+  "arch-concrete-glass": "BuildingWireframe",
+  "arch-parametric-pavilion": "CADStructure",
+  "arch-urban-masterplan": "CADStructure",
+  "arch-geodesic-biome": "GeometricCluster",
+  "arch-mass-timber": "CADStructure",
+  "arch-civil-infrastructure": "CADStructure",
+  "arch-interior-spatial": "FloatingMeshNode",
+  "arch-mep-mechanical": "MechanicalGears",
+  "arch-acoustic-concert": "ParticleVortex",
+
+  // Family 9: Automotive & Mechanical (81-90)
+  "auto-hypercar-chassis": "AutomotiveChassis",
+  "auto-formula-racing": "AutomotiveChassis",
+  "auto-turbo-powertrain": "MechaCore",
+  "auto-ev-powertrain": "AutomotiveChassis",
+  "auto-chronograph-watch": "MechanicalGears",
+  "auto-industrial-robot-arm": "MechaCore",
+  "auto-drone-propulsion": "SatelliteOrbit",
+  "auto-cnc-machinist": "CADStructure",
+  "auto-suspension-dynamics": "MechanicalGears",
+  "auto-hydrogen-fuel": "SphereOrb",
+
+  // Family 10: Gaming & Interactive (91-100)
+  "game-cyber-quest": "SphereOrb",
+  "game-retro-arcade": "VoxelGrid",
+  "game-scifi-cockpit": "SatelliteOrbit",
+  "game-unreal-shader": "CrystalPrism",
+  "game-isometric-builder": "VoxelGrid",
+  "game-lowpoly-adventurer": "FloatingMeshNode",
+  "game-speedrun-platformer": "NeonRings",
+  "game-cyber-stealth": "TerminalCodeWall",
+  "game-esports-arena": "MechaCore",
+  "game-experimental-webgl": "TorusKnotCore",
+};
+
+function getFamilyDefaultComponent(family: string): ComponentType {
+  switch (family) {
+    case "Anime & Character":
+      return "AnimeCharacterAvatar";
+    case "AI & Tech":
+      return "NeuralNodes";
+    case "Space & Sci-Fi":
+      return "SpacePlanet";
+    case "3D Creative":
+      return "TorusKnotCore";
+    case "Glassmorphism":
+      return "CrystalPrism";
+    case "Developer & Cyber":
+      return "TerminalCodeWall";
+    case "Corporate & Professional":
+      return "ExecutiveMonolith";
+    case "Architecture & Engineering":
+      return "BuildingWireframe";
+    case "Automotive & Mechanical":
+      return "AutomotiveChassis";
+    case "Gaming & Interactive":
+      return "VoxelGrid";
+    default:
+      return "TorusKnotCore";
+  }
+}
+
+// Generate distinct, high-impact 3D scenes for every preset
+function generatePresetScene(
+  baseScene: any,
+  id: string,
+  name: string,
+  family: string,
+  tags: string[],
+  primaryColor: string,
+  secondaryColor: string,
+  sceneComponentOverride?: ComponentType
+): any {
+  const componentType = sceneComponentOverride || PRESET_COMPONENT_MAP[id] || getFamilyDefaultComponent(family);
+
+  // Tailor camera position & auto-rotate per 3D geometry structure
+  let cameraPos: [number, number, number] = [0, 0, 7.5];
+  let autoRotateSpeed = 0.8;
+  if (componentType === "SpacePlanet") {
+    cameraPos = [0, 0.5, 8.5];
+    autoRotateSpeed = 0.5;
+  } else if (componentType === "BuildingWireframe") {
+    cameraPos = [0, 0.5, 7.0];
+    autoRotateSpeed = 0.6;
+  } else if (componentType === "AutomotiveChassis") {
+    cameraPos = [0, 0.8, 6.5];
+    autoRotateSpeed = 0.7;
+  } else if (componentType === "SatelliteOrbit") {
+    cameraPos = [0, 1.2, 9.0];
+    autoRotateSpeed = 0.4;
+  } else if (componentType === "TerminalCodeWall") {
+    cameraPos = [0, 0, 6.0];
+    autoRotateSpeed = 0.3;
+  } else if (componentType === "VoxelGrid") {
+    cameraPos = [0, 1.4, 6.5];
+    autoRotateSpeed = 0.6;
+  } else if (componentType === "ExecutiveMonolith") {
+    cameraPos = [0, 0, 7.0];
+    autoRotateSpeed = 0.5;
+  }
+
+  // Lighting theme
+  let lightPreset: "studio" | "cyberpunk" | "warm-sunset" | "minimal-white" | "neon-noir" | "deep-space" = "cyberpunk";
+  if (family === "Space & Sci-Fi") lightPreset = "deep-space";
+  else if (family === "Corporate & Professional") lightPreset = "studio";
+  else if (family === "Architecture & Engineering") lightPreset = "neon-noir";
+  else if (family === "Glassmorphism") lightPreset = "studio";
+  else if (primaryColor.toLowerCase().includes("f59e0b") || primaryColor.toLowerCase().includes("ef4444")) lightPreset = "warm-sunset";
+
+  const isWireframe = tags.some((t) => /wireframe|cad|blueprint|mesh|halftone/i.test(t)) || componentType === "CADStructure";
+  const isRefractive = family === "Glassmorphism" || tags.some((t) => /crystal|prism|glass/i.test(t));
+  const isMetallic = family === "Corporate & Professional" || family === "Automotive & Mechanical" || tags.some((t) => /metal|titanium|gold|chrome/i.test(t));
+
+  const mainNode: SceneMeshNode = {
+    id: `node-${id}-primary`,
+    componentType,
+    label: `${name} 3D Geometry`,
+    position: [0, 0, 0] as [number, number, number],
+    rotation: [0, 0, 0] as [number, number, number],
+    scale: [1.1, 1.1, 1.1] as [number, number, number],
+    materialProps: {
+      type: "standard" as const,
+      color: primaryColor,
+      emissive: secondaryColor,
+      emissiveIntensity: 0.5,
+      roughness: isRefractive ? 0.08 : isMetallic ? 0.15 : 0.25,
+      metalness: isMetallic ? 0.92 : isRefractive ? 0.1 : 0.8,
+      wireframe: isWireframe,
+      transparent: true,
+      opacity: isRefractive ? 0.85 : 0.95,
+    },
+    animation: {
+      type: "rotate",
+      axis: "y",
+      speed: 0.5,
+      rotateSpeed: [0.1, 0.2, 0.05],
+      floatAmplitude: 0.2,
+      floatSpeed: 1.0,
+      pulseSpeed: 0,
+      pulseRange: [0.95, 1.05],
+    },
+    interactive: {
+      hoverScale: 1.08,
+      hoverGlow: true,
+      hoverColor: secondaryColor,
+      clickAction: "rotate",
+      pointerParallax: true,
+      parallaxStrength: 0.3,
+    },
+    visible: true,
+  };
+
+  const nodes: SceneMeshNode[] = [mainNode];
+
+  // Anime character gets floating sakura petals
+  if (componentType === "AnimeCharacterAvatar") {
+    nodes.push({
+      id: `node-${id}-ambient-petals`,
+      componentType: "SakuraPetalField" as ComponentType,
+      label: "Floating Sakura Petals",
+      position: [0, 0, 0] as [number, number, number],
+      rotation: [0, 0, 0] as [number, number, number],
+      scale: [1, 1, 1] as [number, number, number],
+      materialProps: {
+        type: "standard" as const,
+        color: secondaryColor || "#FFB7C5",
+        emissive: primaryColor,
+        emissiveIntensity: 0.4,
+        roughness: 0.3,
+        metalness: 0.1,
+        wireframe: false,
+        transparent: true,
+        opacity: 0.85,
+      },
+      animation: {
+        type: "float" as const,
+        axis: "y" as const,
+        speed: 0.6,
+        rotateSpeed: [0, 0.1, 0] as [number, number, number],
+        floatAmplitude: 0.3,
+        floatSpeed: 0.8,
+        pulseSpeed: 0,
+        pulseRange: [0.95, 1.05] as [number, number],
+      },
+      interactive: {
+        hoverScale: 1,
+        hoverGlow: false,
+        clickAction: "none" as const,
+        pointerParallax: true,
+        parallaxStrength: 0.2,
+      },
+      visible: true,
+    });
+  }
+
+  return {
+    ...baseScene,
+    id: `scene-${id}`,
+    name: `${name} 3D Scene`,
+    camera: {
+      ...baseScene?.camera,
+      position: cameraPos,
+      controls: {
+        ...baseScene?.camera?.controls,
+        autoRotate: true,
+        autoRotateSpeed,
+      },
+    },
+    lighting: {
+      preset: lightPreset,
+      ambientIntensity: 0.5,
+      lights: [
+        {
+          id: `light-${id}-key`,
+          type: "point" as const,
+          color: primaryColor,
+          intensity: 2.2,
+          position: [5, 4, 6] as [number, number, number],
+          castShadow: false,
+        },
+        {
+          id: `light-${id}-rim`,
+          type: "point" as const,
+          color: secondaryColor,
+          intensity: 1.8,
+          position: [-5, -2, -4] as [number, number, number],
+          castShadow: false,
+        },
+        {
+          id: `light-${id}-ambient`,
+          type: "ambient" as const,
+          color: "#FFFFFF",
+          intensity: 0.4,
+        },
+      ],
+    },
+    environment: {
+      ...baseScene?.environment,
+      particles: {
+        enabled: true,
+        count: 650,
+        color: primaryColor,
+        size: 0.03,
+        speed: 0.3,
+      },
+    },
+    nodes,
+  };
+}
+
 // Preset generator helper to derive rich distinct presets from flagship bases
 function createPreset(
   base: TemplateDefinition,
@@ -41,13 +381,20 @@ function createPreset(
     secondaryColor?: string;
     cardStyle?: any;
     heroLayout?: any;
+    sceneComponent?: ComponentType;
   }
 ): PresetCatalogItem {
-  const { family, tags, primaryColor, secondaryColor, cardStyle, heroLayout, ...rest } = override;
+  const { family, tags, primaryColor, secondaryColor, cardStyle, heroLayout, sceneComponent, ...rest } = override;
+  const pColor = primaryColor || base.defaultTheme?.colors?.primary || "#00F0FF";
+  const sColor = secondaryColor || base.defaultTheme?.colors?.secondary || "#7928CA";
+
   const newTheme = {
     ...base.defaultTheme,
-    ...(primaryColor ? { colors: { ...base.defaultTheme.colors, primary: primaryColor } } : {}),
-    ...(secondaryColor ? { colors: { ...base.defaultTheme.colors, secondary: secondaryColor } } : {}),
+    colors: {
+      ...base.defaultTheme.colors,
+      primary: pColor,
+      secondary: sColor,
+    },
   };
 
   const newLayout = {
@@ -56,11 +403,27 @@ function createPreset(
     ...(heroLayout ? { heroLayout } : {}),
   };
 
+  const newScene = generatePresetScene(
+    base.defaultScene,
+    override.id,
+    override.name,
+    family,
+    tags,
+    pColor,
+    sColor,
+    sceneComponent
+  );
+
+  const nodeTypes = newScene.nodes.map((n: any) => n.componentType);
+  const supportedObjects = Array.from(new Set([...(base.supportedObjects || []), ...nodeTypes]));
+
   const parsed = TemplateSchema.parse({
     ...base,
     ...rest,
     defaultTheme: newTheme,
     defaultLayout: newLayout,
+    defaultScene: newScene,
+    supportedObjects,
   });
 
   return {

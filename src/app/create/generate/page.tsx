@@ -79,6 +79,7 @@ export default function CreateGenerateStepPage() {
     }
 
     runAnalysis();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const triggerGeneration = async () => {

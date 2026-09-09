@@ -6,6 +6,8 @@ import { db } from "@/lib/db";
 // In-memory fallback cache for development / mock sessions
 const globalDraftCache = new Map<string, any>();
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

@@ -10,6 +10,8 @@ interface RouteParams {
   };
 }
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
     const { portfolioId } = params;
